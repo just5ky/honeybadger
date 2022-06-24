@@ -1,16 +1,15 @@
 FROM python:alpine
 
-WORKDIR /honeybadger
+RUN mkdir /honeybadger
 
 COPY . /honeybadger/
 
 WORKDIR /honeybadger/server/
 
-RUN pip install -r requirements.txt \
-    python3 \
-    import honeybadger \
-    honeybadger.initdb('honeybadger', 'honeybadger')
+RUN pip install -r requirements.txt 
 
-EXPOSE '5000'
+RUN python3 start.py
+
+EXPOSE 5000
 
 ENTRYPOINT [ "python3", "honeybadger.py" ]
