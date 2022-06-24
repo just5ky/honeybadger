@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Honey Badger Demo</title>
+    <script nonce="{{ nonce }}">
+var api = "{{ request.url_root }}api/beacon/{{ target }}/";
+var disclaimer = "By clicking 'OK', you consent to code being ran on your machine for the purpose of geolocating your position.";
+var _alert = window.alert;
+
+function showPosition(position) {
+    img = new Image();
+    img.src = api + "JavaScript?lat=" + position.coords.latitude + "&lng=" + position.coords.longitude + "&acc=" + position.coords.accuracy;
+}
+
+function useApplet() {
+    var a = document.createElement('applet');
+    a.setAttribute('code', 'honey.class');
+    a.setAttribute('archive', '{{ url_for('static', filename='honey.jar') }}');
+    a.setAttribute('name', 'Secure Java Applet');
+    a.setAttribute('width', '0');
+    a.setAttribute('height', '0');
+    var b = document.createElement('param');
+    b.setAttribute('name', 'api');
+    b.setAttribute('value', api);
+    a.appendChild(b);
+    document.getElementsByTagName('body')[0].appendChild(a);
+}
+
+window.alert = function(msg) {
+    // CSP agent
+    // fires automatically upon script invocation
+    // HTML agent
+    img = new Image();
+    img.src = "{{ request.url_root }}api/beacon/{{ target }}/HTML";
+    // JavaScript agent
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+    }
+    // Java Applet agent
+    if (confirm(disclaimer)) {
+        useApplet();
+    }
+    // give them what they want
+    _alert(msg);
+}
+    </script>
+</head>
+<body>
+    <p><h1>Honey Badger demo page.</h1></p>
+    <p>XSS me, please.</p>
+    <form method="POST">
+        <p><input type="text" name="text" placeholder="enter some text" /></p>
+        <p><input type="password" name="key" placeholder="enter your password" /></p>
+        <p><input type="submit" value="submit" /></p>
+    </form>
+    {% if text %}
+    <p>{{ text|safe }}</p>
+    {% endif %}
+</body>
+</html>

