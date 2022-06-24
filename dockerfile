@@ -6,8 +6,11 @@ COPY . /honeybadger/
 
 WORKDIR /honeybadger/server/
 
-RUN python3 \
+RUN pip install -r requirements.txt \
+    python3 \
     import honeybadger \
     honeybadger.initdb('honeybadger', 'honeybadger')
+
+EXPOSE '5000'
 
 ENTRYPOINT [ "python3", "honeybadger.py" ]
