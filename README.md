@@ -4,11 +4,34 @@ HoneyBadger is a framework for targeted geolocation. While honeypots are traditi
 
 An early prototype of HoneyBadger (v1) can be seen in the presentation "[Hide and Seek: Post-Exploitation Style](http://youtu.be/VJTrRMqHU5U)" from ShmooCon 2013. The associated Metasploit Framework modules mentioned in the above presentation can be found [here](https://github.com/v10l3nt/metasploit-framework/tree/master/modules/auxiliary/badger). Note: These modules have not been updated to work with v2 of the API.
 
+![GitHub repo size](https://img.shields.io/github/repo-size/just5ky/honeybadger?label=Repo%20Size&logo=github)
+![Docker Build](https://github.com/just5ky/honeybadger/workflows/Docker/badge.svg) 
+![Docker Pulls](https://img.shields.io/docker/pulls/justsky/honeybadger)
+![Docker Size](https://img.shields.io/docker/image-size/justsky/honeybadger)
+
 ## Getting Started
 
 ### Pre-requisites
 
-* Python 3.x
+* ~~Python 3.x~~
+* Docker
+
+
+#### Docker Run
+`docker run --rm --name honeybadger  -p 5000:5000  justsky/honeybadger`
+
+#### Docker compose
+
+```yml
+version: "3"
+services:
+    honeybadger
+        name: honeybadger
+        restart: unless-stopped
+        image: justsky/honeybadger
+        ports:
+            - "5000:5000"
+```
 
 ### Installation (Ubuntu and OS X)
 
