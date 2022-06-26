@@ -1,6 +1,7 @@
 # HoneyBadger v3
 
 <div align="center">
+
 ![](/server/honeybadger/static/honeybadger.png)
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/just5ky/honeybadger?label=Repo%20Size&logo=github)
@@ -37,6 +38,7 @@ services:
         ports:
             - "5000:5000"
 ```
+Login with `honeybadger` and `honeybadger` as username and password.
 
 ### Installation (Ubuntu and OS X)
 
