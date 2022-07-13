@@ -4,7 +4,7 @@
 
 ![](/server/honeybadger/static/honeybadger.png)
 
-![GitHub repo size](https://img.shields.io/github/repo-size/just5ky/honeybadger?label=Repo%20Size&logo=github)
+![GitHub repo size](https://img.shields.io/github/repo-size/Just5KY/honeybadger?label=Repo%20Size&logo=github)
 ![Docker Build](https://github.com/just5ky/honeybadger/workflows/Docker/badge.svg) 
 ![Docker Pulls](https://img.shields.io/docker/pulls/justsky/honeybadger)
 ![Docker Size](https://img.shields.io/docker/image-size/justsky/honeybadger)
